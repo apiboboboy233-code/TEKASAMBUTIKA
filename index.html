@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Lounge - Asah Otak Interaktif</title>
+    
+    <style>
+        /* Import Font */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        /* Variabel Warna Sesuai Konsep */
+        :root {
+            --navy: #0a192f;
+            --light-navy: #112240;
+            --text-light: #ccd6f6;
+            --text-dark: #8892b0;
+            --cyan: #64ffda;
+            --orange: #ff8c42;
+            --green-light: rgba(100, 255, 218, 0.1);
+            --red-light: rgba(255, 100, 100, 0.1);
+            --red: #ff6464;
+        }
+
+        /* Pengaturan Dasar (Reset) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: var(--navy);
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* 7. Struktur Halaman - Header */
+        header {
+            background-color: var(--light-navy);
+            padding: 20px 40px;
+            text-align: center;
+            border-bottom: 2px solid var(--cyan);
+        }
+
+        header h1 {
+            color: var(--cyan);
+            font-weight: 600;
+        }
+
+        header p {
+            color: var(--text-dark);
+            font-size: 0.9em;
+        }
+
+        /* (BARU) Styling untuk Game Mode Tabs */
+        .game-modes {
+            display: flex;
+            justify-content: center;
+            margin: 20px auto 0;
+            padding: 0 20px;
+            flex-wrap: wrap; /* Agar responsif di HP */
+            max-width: 1200px;
+        }
+        .mode-btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: 1px solid var(--text-dark);
+            background-color: transparent;
+            color: var(--text-dark);
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+        }
+        .mode-btn:hover {
+            background-color: var(--light-navy);
+            color: var(--text-light);
+        }
+        .mode-btn.active {
+            background-color: var(--cyan);
+            color: var(--navy);
+            border-color: var(--cyan);
+            font-weight: 600;
+        }
+
+        /* Kontainer Utama (Layout Flex) */
+        .container {
+            display: flex;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        /* 7. Struktur Halaman - Main Content */
+        .main-content {
+            flex: 3; /* Mengambil 3 bagian ruang */
+            margin-right: 20px;
+        }
+
+        /* 3. Konsep Tampilan - Card Style & Animasi */
+        .puzzle-card {
+            background-color: var(--light-navy);
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            /* Transisi halus saat ganti soal */
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .puzzle-card h2 {
+            color: var(--text-light);
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            min-height: 50px; /* Jaga ketinggian agar stabil */
+        }
+
+        /* 5. Fitur - Input Jawaban */
+        .answer-section {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        #answer-input {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid var(--text-dark);
+            background-color: var(--navy);
+            color: var(--text-light);
+            border-radius: 4px 0 0 4px;
+            font-size: 1em;
+        }
+
+        #answer-input:focus {
+            outline: none;
+            border-color: var(--cyan);
+        }
+
+        /* Tombol Dasar */
+        button {
+            padding: 12px 15px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            transition: background-color 0.3s ease, opacity 0.3s ease;
+        }
+
+        /* 5. Fitur - Tombol Cek Jawaban */
+        #check-btn {
+            background-color: var(--cyan);
+            color: var(--navy);
+            border-radius: 0 4px 4px 0;
+        }
+        #check-btn:hover {
+            background-color: #52d6bc;
+        }
+
+        /* 5. Fitur - Tombol Hint */
+        #hint-btn {
+            background-color: var(--orange);
+            color: var(--navy);
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        #hint-btn:hover {
+            background-color: #e07b3a;
+        }
+
+        /* 5. Fitur - Tombol Navigasi */
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #prev-btn, #next-btn {
+            background-color: transparent;
+            color: var(--cyan);
+            border: 1px solid var(--cyan);
+            border-radius: 4px;
+            width: 48%;
+        }
+        #prev-btn:hover, #next-btn:hover {
+            background-color: var(--green-light);
+        }
+
+        /* Status disabled untuk tombol navigasi */
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: var(--text-dark);
+            color: var(--navy);
+            border-color: var(--text-dark);
+        }
+
+        /* 6. Respon Visual (Benar, Salah, Hint) */
+        .feedback {
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 15px;
+            font-weight: 600;
+            display: none; /* Sembunyi secara default */
+            animation: fadeIn 0.5s;
+        }
+
+        .feedback.correct {
+            display: block;
+            background-color: var(--green-light);
+            color: var(--cyan);
+            border: 1px solid var(--cyan);
+        }
+
+        .feedback.incorrect {
+            display: block;
+            background-color: var(--red-light);
+            color: var(--red);
+            border: 1px solid var(--red);
+        }
+
+        .hint-text {
+            color: var(--text-dark);
+            font-style: italic;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: var(--navy);
+            border-radius: 4px;
+            display: none; /* Sembunyi secara default */
+            animation: fadeIn 0.5s;
+        }
+
+        /* Animasi Fade In Sederhana */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* 5. Fitur - Progress Bar */
+        .progress-section {
+            margin-bottom: 10px;
+        }
+        .progress-container {
+            width: 100%;
+            background-color: var(--light-navy);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 10px;
+            width: 0%; /* Di-update oleh JS */
+            background-color: var(--cyan);
+            transition: width 0.5s ease-out;
+        }
+        #progress-text {
+            text-align: right;
+            display: block;
+            font-size: 0.9em;
+            color: var(--text-dark);
+            margin-top: 5px;
+        }
+
+        /* 7. Struktur Halaman - Sidebar */
+        .sidebar {
+            flex: 1; /* Mengambil 1 bagian ruang */
+            background-color: var(--light-navy);
+            padding: 20px;
+            border-radius: 8px;
+            height: fit-content; /* Agar tingginya sesuai isi */
+        }
+
+        .sidebar h3 {
+            color: var(--cyan);
+            border-bottom: 1px solid var(--text-dark);
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        .sidebar p {
+            color: var(--text-dark);
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        #score-display {
+            color: var(--text-light);
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        /* 5. Fitur - Daftar Soal */
+        #puzzle-list {
+            list-style: none;
+            margin-bottom: 20px;
+            max-height: 250px; /* Batasi tinggi daftar soal */
+            overflow-y: auto; /* Tambahkan scroll jika daftar panjang */
+        }
+
+        #puzzle-list li {
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            background-color: var(--navy);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            color: var(--text-dark);
+            font-size: 0.9em;
+        }
+
+        #puzzle-list li:hover {
+            background-color: #304566; /* Biru yang sedikit lebih terang */
+        }
+
+        /* Status untuk Daftar Soal */
+        #puzzle-list li.active {
+            background-color: var(--cyan);
+            color: var(--navy);
+            font-weight: 600;
+        }
+        #puzzle-list li.completed {
+            text-decoration: line-through;
+            opacity: 0.7;
+            background-color: var(--light-navy);
+            color: var(--text-dark);
+        }
+
+        /* 7. Struktur Halaman - Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            border-top: 1px solid var(--light-navy);
+            color: var(--text-dark);
+            font-size: 0.9em;
+        }
+
+        /* 3. Konsep Tampilan - Responsif */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column; /* Tumpuk main content dan sidebar */
+            }
+            
+            .main-content {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+
+            .answer-section {
+                flex-direction: column; /* Tumpuk input dan tombol */
+            }
+
+            #answer-input {
+                border-radius: 4px 4px 0 0;
+            }
+
+            #check-btn {
+                border-radius: 0 0 4px 4px;
+                width: 100%;
+            }
+
+            #prev-btn, #next-btn {
+                font-size: 0.9em;
+            }
+
+            header {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Puzzle Lounge</h1>
+        <p>Kumpulan teka-teki dan permainan asah otak interaktif.</p>
+    </header>
+
+    <nav class="game-modes">
+        <button id="btn-tekaTeki" class="mode-btn active">Teka-Teki (20)</button>
+        <button id="btn-tebakKata" class="mode-btn">Tebak Kata (20)</button>
+        <button id="btn-matematika" class="mode-btn">Matematika (5)</button>
+        <button id="btn-lucu" class="mode-btn">Lucu (5)</button>
+    </nav>
+
+    <div class="container">
+
+        <main class="main-content">
+            
+            <div class="progress-section">
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <span id="progress-text">0 / 0 Selesai</span>
+            </div>
+
+            <div class="puzzle-card" id="puzzle-card">
+                
+                <h2 id="puzzle-question">Pertanyaan akan dimuat di sini...</h2>
+                
+                <div class="answer-section">
+                    <input type="text" id="answer-input" placeholder="Ketik jawabanmu di sini...">
+                    <button id="check-btn">Cek Jawaban</button>
+                </div>
+                
+                <button id="hint-btn">Tunjukkan Hint</button>
+                
+                <div id="feedback-message" class="feedback"></div>
+                
+                <p id="hint-text" class="hint-text"></p>
+
+            </div>
+
+            <div class="navigation-buttons">
+                <button id="prev-btn" disabled>Sebelumnya</button>
+                <button id="next-btn">Berikutnya</button>
+            </div>
+
+        </main>
+
+        <aside class="sidebar">
+            <h3 id="sidebar-title">Daftar Soal</h3>
+            <ul id="puzzle-list">
+                </ul>
+
+            <h3>Skor Anda</h3>
+            <p id="score-display">Skor: 0</p>
+
+            <h3>Petunjuk Penggunaan</h3>
+            <p>
+                - Pilih mode permainan di atas.<br>
+                - Gunakan tombol "Cek Jawaban" untuk mengirim jawaban Anda.<br>
+                - Jawaban benar (pertama kali) akan menambah skor.
+            </p>
+        </aside>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Puzzle Lounge. Latih otakmu setiap hari untuk pikiran yang lebih tajam!</p>
+    </footer>
+
+    <script>
+        // Menunggu semua elemen HTML dimuat sebelum menjalankan skrip
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- (BARU) Data Terpusat untuk Semua Game ---
+            const gameData = {
+                // 1. Permainan Teka-Teki (20 Soal)
+                tekaTeki: [
+                    { question: "Jika kamu punya aku, kamu ingin membagikanku. Jika kamu membagikanku, kamu tidak memilikiku. Apakah aku?", answer: "rahasia", hint: "Sesuatu yang sulit disimpan." },
+                    { question: "Aku memiliki kota, tapi tidak punya rumah. Aku memiliki gunung, tapi tidak punya pohon. Aku memiliki air, tapi tidak punya ikan. Apakah aku?", answer: "peta", hint: "Representasi dari sebuah tempat." },
+                    { question: "Apa yang selalu datang tapi tidak pernah tiba?", answer: "besok", hint: "Konsep waktu di masa depan." },
+                    { question: "Aku punya leher tanpa kepala, dan punya punggung tanpa badan. Apakah aku?", answer: "botol", hint: "Tempat menyimpan cairan." },
+                    { question: "Semakin banyak kamu ambil, semakin banyak yang kamu tinggalkan. Apakah itu?", answer: "jejak kaki", hint: "Dihasilkan saat berjalan di tempat lunak." },
+                    { question: "Apa yang naik tapi tidak pernah turun?", answer: "umur", hint: "Berkaitan dengan pertambahan usia." },
+                    { question: "Aku berbicara semua bahasa, tapi aku tidak pernah sekolah. Apakah aku?", answer: "gema", hint: "Suara yang memantul." },
+                    { question: "Apa yang bisa pecah tanpa disentuh?", answer: "janji", hint: "Sesuatu yang harus ditepati." },
+                    { question: "Milikmu, tapi lebih sering dipakai orang lain. Apakah itu?", answer: "nama", hint: "Orang memanggilmu dengan ini." },
+                    { question: "Jika seekor angsa bertelur di perbatasan Indonesia dan Malaysia, telur itu milik siapa?", answer: "angsa", hint: "Bebek tidak bertelur." },
+                    { question: "Aku selalu di depanmu, tapi kamu tidak bisa melihatku. Apakah aku?", answer: "masa depan", hint: "Waktu yang akan datang." },
+                    { question: "Apa yang basah saat mengeringkan?", answer: "handuk", hint: "Digunakan setelah mandi." },
+                    { question: "Benda apa yang jika dipegang meledak, jika dilihat marah?", answer: "petasan", hint: "Berbunyi keras saat dinyalakan." }, // Sedikit plesetan
+                    { question: "Aku punya 6 wajah dan 21 mata, tapi tidak bisa melihat. Apakah aku?", answer: "dadu", hint: "Digunakan dalam permainan papan." },
+                    { question: "Apa yang berjalan tanpa kaki?", answer: "jam", hint: "Menunjukkan waktu." },
+                    { question: "Mana yang lebih berat, satu kilo kapas atau satu kilo besi?", answer: "sama berat", hint: "Keduanya sama-sama satu kilo." },
+                    { question: "Masuk miring, keluar miring. Apakah itu?", answer: "kancing baju", hint: "Digunakan untuk mengaitkan pakaian." },
+                    { question: "Aku tidak punya paru-paru, tapi aku butuh udara. Aku tidak hidup, tapi aku bisa mati. Apakah aku?", answer: "api", hint: "Padam jika disiram air." },
+                    { question: "Bisa diukur tapi tak bisa dilihat, bisa dirasa tapi tak bisa dipegang. Apakah itu?", answer: "waktu", hint: "Terus berjalan maju." },
+                    { question: "Apa yang punya banyak gigi tapi tidak bisa makan?", answer: "sisir", hint: "Untuk merapikan rambut." }
+                ],
+                // 2. Permainan Tebak Kata (20 Soal)
+                tebakKata: [
+                    { question: "Ibukota negara Indonesia.", answer: "jakarta", hint: "Ada Monas di sana." },
+                    { question: "Buah yang disukai monyet.", answer: "pisang", hint: "Berwarna kuning jika matang." },
+                    { question: "Warna langit saat cerah.", answer: "biru", hint: "Seperti warna laut." },
+                    { question: "Tempat kita meminjam buku.", answer: "perpustakaan", hint: "Banyak rak buku." },
+                    { question: "Hewan yang bisa terbang dan sering keluar di malam hari.", answer: "kelelawar", hint: "Tidur terbalik." },
+                    { question: "Benda untuk menulis di papan tulis putih.", answer: "spidol", hint: "Bukan kapur." },
+                    { question: "Alat untuk melihat benda yang sangat kecil.", answer: "mikroskop", hint: "Digunakan di laboratorium." },
+                    { question: "Mata uang negara Jepang.", answer: "yen", hint: "Bukan dolar atau rupiah." },
+                    { question: "Planet terbesar di tata surya kita.", answer: "jupiter", hint: "Planet gas raksasa." },
+                    { question: "Olahraga yang menggunakan raket dan shuttlecock.", answer: "bulu tangkis", hint: "Sering dimainkan ganda atau tunggal." },
+                    { question: "Negara yang terkenal dengan Menara Eiffel.", answer: "prancis", hint: "Ibukotanya Paris." },
+                    { question: "Alat musik yang dipetik.", answer: "gitar", hint: "Biasanya punya 6 senar." },
+                    { question: "Bahan bakar untuk pesawat terbang.", answer: "avtur", hint: "Bukan bensin." },
+                    { question: "Satu tahun ada berapa bulan?", answer: "dua belas", hint: "Dimulai dari Januari." },
+                    { question: "Indra untuk mengecap rasa.", answer: "lidah", hint: "Ada di dalam mulut." },
+                    { question: "Pahlawan proklamasi Indonesia (salah satu).", answer: "soekarno", hint: "Presiden pertama RI." },
+                    { question: "Alat untuk memotong kertas.", answer: "gunting", hint: "Punya dua sisi tajam." },
+                    { question: "Bumbu dapur yang rasanya asin.", answer: "garam", hint: "Berasal dari air laut." },
+                    { question: "Proses air menjadi uap.", answer: "menguap", hint: "Terjadi saat air dipanaskan." },
+                    { question: "Hewan tercepat di darat.", answer: "cheetah", hint: "Punya bintik-bintik hitam." }
+                ],
+                // 3. Permainan Matematika (5 Soal)
+                matematika: [
+                    { question: "Berapakah hasil dari: 15 + 25?", answer: "40", hint: "Penjumlahan sederhana." },
+                    { question: "Berapakah hasil dari: 8 x 7?", answer: "56", hint: "Perkalian 8." },
+                    { question: "Berapakah hasil dari: 100 / 4?", answer: "25", hint: "Dibagi seperempat." },
+                    { question: "Berapakah hasil dari: (10 + 5) * 2?", answer: "30", hint: "Kerjakan yang di dalam kurung dulu." },
+                    { question: "Berapakah hasil dari: 50 - (3 * 5)?", answer: "35", hint: "Dahulukan perkalian." }
+                ],
+                // 4. Permainan Lucu (5 Soal)
+                lucu: [
+                    { question: "Hewan apa yang paling kaya?", answer: "beruang", hint: "Karena 'ber-uang'." },
+                    { question: "Nasi apa yang nggak bikin kenyang?", answer: "nasihat", hint: "Sesuatu yang diberikan orang tua." },
+                    { question: "Kenapa bebek goreng rasanya enak?", answer: "karena ada huruf b", hint: "Coba hilangkan huruf 'B'-nya." },
+                    { question: "Buah apa yang paling sopan?", answer: "mangga", hint: "Sering bilang 'mangga, pak'." },
+                    { question: "Kecil, hitam, kalau dipencet keluar. Apakah itu?", answer: "bel", hint: "Ada di depan pintu rumah." }
+                ]
+            };
+
+            // --- Variabel Status Permainan (DIPERBARUI) ---
+            let currentGameMode = 'tekaTeki'; // Mode default
+            let currentPuzzleIndex = 0;
+            let score = 0;
+            // (BARU) Menyimpan jawaban untuk SEMUA mode
+            let userAnswers = {
+                tekaTeki: [],
+                tebakKata: [],
+                matematika: [],
+                lucu: []
+            };
+
+            // --- Seleksi Elemen DOM ---
+            const questionEl = document.getElementById('puzzle-question');
+            const answerInputEl = document.getElementById('answer-input');
+            const checkBtn = document.getElementById('check-btn');
+            const hintBtn = document.getElementById('hint-btn');
+            const feedbackEl = document.getElementById('feedback-message');
+            const hintTextEl = document.getElementById('hint-text');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const scoreEl = document.getElementById('score-display');
+            const progressBarEl = document.getElementById('progress-bar');
+            const progressTextEl = document.getElementById('progress-text');
+            const puzzleListEl = document.getElementById('puzzle-list');
+            const puzzleCardEl = document.getElementById('puzzle-card');
+            const sidebarTitleEl = document.getElementById('sidebar-title');
+
+            // (BARU) Seleksi Tombol Mode
+            const modeButtons = {
+                tekaTeki: document.getElementById('btn-tekaTeki'),
+                tebakKata: document.getElementById('btn-tebakKata'),
+                matematika: document.getElementById('btn-matematika'),
+                lucu: document.getElementById('btn-lucu')
+            };
+
+            // --- (BARU) Fungsi untuk Ganti Mode Permainan ---
+            function selectGameMode(modeName) {
+                // Set mode aktif
+                currentGameMode = modeName;
+                currentPuzzleIndex = 0;
+                score = 0; // Reset skor saat ganti mode
+
+                // Inisialisasi array jawaban jika belum ada
+                const currentPuzzles = gameData[currentGameMode];
+                if (!userAnswers[currentGameMode] || userAnswers[currentGameMode].length === 0) {
+                    userAnswers[currentGameMode] = Array(currentPuzzles.length).fill(null);
+                }
+
+                // Update tampilan tombol mode
+                for (const key in modeButtons) {
+                    modeButtons[key].classList.remove('active');
+                }
+                modeButtons[modeName].classList.add('active');
+
+                // Update judul sidebar
+                sidebarTitleEl.textContent = modeButtons[modeName].textContent;
+
+                // Muat ulang UI untuk game baru
+                populatePuzzleList();
+                loadPuzzle(0);
+                updateScore();
+                updateProgress();
+            }
+
+
+            // --- (DIPERBARUI) Fungsi Memuat Teka-Teki ---
+            function loadPuzzle(index) {
+                puzzleCardEl.style.opacity = 0; // Animasi fade out
+
+                // (BARU) Ambil data dari mode yang aktif
+                const currentPuzzles = gameData[currentGameMode];
+                const currentAnswers = userAnswers[currentGameMode];
+                
+                setTimeout(() => {
+                    currentPuzzleIndex = index;
+                    const puzzle = currentPuzzles[index];
+
+                    questionEl.textContent = puzzle.question;
+                    hintTextEl.textContent = `Hint: ${puzzle.hint}`;
+                    
+                    answerInputEl.value = '';
+                    feedbackEl.style.display = 'none';
+                    hintTextEl.style.display = 'none';
+                    feedbackEl.className = 'feedback'; 
+
+                    // (BARU) Cek jawaban dari array yang sesuai
+                    if (currentAnswers[index] !== null) {
+                        answerInputEl.disabled = true;
+                        checkBtn.disabled = true;
+                        showFeedback(currentAnswers[index], puzzle.answer);
+                    } else {
+                        answerInputEl.disabled = false;
+                        checkBtn.disabled = false;
+                    }
+
+                    updateNavButtons();
+                    updatePuzzleListVisuals();
+                    
+                    puzzleCardEl.style.opacity = 1; // Animasi fade in
+                }, 400); 
+            }
+
+            // --- (DIPERBARUI) Fungsi Cek Jawaban ---
+            function checkAnswer() {
+                // (BARU) Ambil data dari mode yang aktif
+                const currentPuzzles = gameData[currentGameMode];
+                const currentAnswers = userAnswers[currentGameMode];
+                const puzzle = currentPuzzles[currentPuzzleIndex];
+
+                const userAnswer = answerInputEl.value.trim().toLowerCase();
+                const correctAnswer = puzzle.answer.toLowerCase();
+
+                if (userAnswer === '') {
+                    alert('Silakan masukkan jawabanmu!');
+                    return;
+                }
+
+                const isCorrect = userAnswer === correctAnswer;
+                
+                if (isCorrect && currentAnswers[currentPuzzleIndex] === null) {
+                    score += 10;
+                    updateScore();
+                }
+
+                currentAnswers[currentPuzzleIndex] = isCorrect; // Simpan ke array yang benar
+
+                // (BARU) Kirim mode saat ini untuk cek emoji
+                showFeedback(isCorrect, puzzle.answer);
+
+                answerInputEl.disabled = true;
+                checkBtn.disabled = true;
+
+                updateProgress();
+                updatePuzzleListVisuals();
+            }
+
+            // --- (DIPERBARUI) Fungsi Menampilkan Feedback ---
+            function showFeedback(isCorrect, correctAnswer) {
+                feedbackEl.style.display = 'block';
+
+                // (BARU) Teks default
+                let correctText = 'Benar! 🎉';
+                let incorrectText = `Salah. Jawaban yang benar adalah: ${correctAnswer}`;
+
+                // (BARU) Kustomisasi untuk mode 'lucu'
+                if (currentGameMode === 'lucu') {
+                    correctText = 'Benar! 😆👌';
+                    incorrectText = `Salah! ✋😂🤚 Jawaban yang benar: ${correctAnswer}`;
+                }
+
+                if (isCorrect) {
+                    feedbackEl.textContent = correctText;
+                    feedbackEl.className = 'feedback correct';
+                } else {
+                    feedbackEl.textContent = incorrectText;
+                    feedbackEl.className = 'feedback incorrect';
+                }
+            }
+
+            // Fungsi Tampilkan Hint (Tidak berubah)
+            function showHint() {
+                hintTextEl.style.display = hintTextEl.style.display === 'block' ? 'none' : 'block';
+            }
+
+            // --- (DIPERBARUI) Fungsi Update Tombol Navigasi ---
+            function updateNavButtons() {
+                const currentPuzzles = gameData[currentGameMode]; // (BARU)
+                prevBtn.disabled = currentPuzzleIndex === 0;
+                nextBtn.disabled = currentPuzzleIndex === currentPuzzles.length - 1;
+            }
+
+            // Fungsi Update Skor (Tidak berubah)
+            function updateScore() {
+                scoreEl.textContent = `Skor: ${score}`;
+            }
+
+            // --- (DIPERBARUI) Fungsi Update Progress Bar ---
+            function updateProgress() {
+                const currentAnswers = userAnswers[currentGameMode]; // (BARU)
+                const currentPuzzles = gameData[currentGameMode]; // (BARU)
+
+                const completedCount = currentAnswers.filter(answer => answer !== null).length;
+                const totalPuzzles = currentPuzzles.length;
+                const percent = (totalPuzzles > 0) ? (completedCount / totalPuzzles) * 100 : 0;
+
+                progressBarEl.style.width = `${percent}%`;
+                progressTextEl.textContent = `${completedCount} / ${totalPuzzles} Selesai`;
+            }
+
+            // --- (DIPERBARUI) Fungsi Membuat Daftar Soal ---
+            function populatePuzzleList() {
+                const currentPuzzles = gameData[currentGameMode]; // (BARU)
+                
+                puzzleListEl.innerHTML = ''; // Kosongkan daftar
+                currentPuzzles.forEach((puzzle, index) => {
+                    const li = document.createElement('li');
+                    li.textContent = `Soal ${index + 1}`; // (BARU) Teks generik
+                    li.dataset.index = index; 
+
+                    li.addEventListener('click', () => {
+                        loadPuzzle(index);
+                    });
+
+                    puzzleListEl.appendChild(li);
+                });
+                updatePuzzleListVisuals(); 
+            }
+
+            // --- (DIPERBARUI) Fungsi Update Visual Daftar Soal ---
+            function updatePuzzleListVisuals() {
+                const currentAnswers = userAnswers[currentGameMode]; // (BARU)
+                const listItems = puzzleListEl.getElementsByTagName('li');
+                
+                for (let i = 0; i < listItems.length; i++) {
+                    listItems[i].className = ''; 
+
+                    if (currentAnswers[i] !== null) {
+                        listItems[i].classList.add('completed');
+                    }
+                    
+                    if (i === currentPuzzleIndex) {
+                        listItems[i].classList.add('active');
+                    }
+                }
+            }
+
+            // --- Inisialisasi & Event Listeners ---
+
+            // Navigasi Soal
+            nextBtn.addEventListener('click', () => {
+                const currentPuzzles = gameData[currentGameMode]; // (BARU)
+                if (currentPuzzleIndex < currentPuzzles.length - 1) {
+                    loadPuzzle(currentPuzzleIndex + 1);
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (currentPuzzleIndex > 0) {
+                    loadPuzzle(currentPuzzleIndex - 1);
+                }
+            });
+
+            // Aksi
+            checkBtn.addEventListener('click', checkAnswer);
+            hintBtn.addEventListener('click', showHint);
+            
+            answerInputEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    if (!checkBtn.disabled) {
+                        checkAnswer();
+                    }
+                }
+            });
+
+            // (BARU) Event Listeners untuk Tombol Mode
+            modeButtons.tekaTeki.addEventListener('click', () => selectGameMode('tekaTeki'));
+            modeButtons.tebakKata.addEventListener('click', () => selectGameMode('tebakKata'));
+            modeButtons.matematika.addEventListener('click', () => selectGameMode('matematika'));
+            modeButtons.lucu.addEventListener('click', () => selectGameMode('lucu'));
+
+            // --- Mulai Permainan ---
+            // (BARU) Muat mode default saat pertama kali dibuka
+            selectGameMode('tekaTeki'); 
+        });
+    </script>
+</body>
+</html>
